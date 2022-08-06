@@ -20,8 +20,7 @@ import java.util.Scanner;
 
 public class table_pane_test extends JFrame implements ActionListener {
 
-    //test
-    //static boolean methodCalled = true;
+
     static boolean new_inv_flag;
     private JPanel pnl_left, pnl_right;
     private JButton btn_new_inv, btn_del_inv, btn_save, btn_cancel;
