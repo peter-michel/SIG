@@ -10,9 +10,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -75,13 +75,13 @@ public class table_pane_test extends JFrame implements ActionListener {
 
         loadFile = new JMenuItem("Load File");
         loadFile.setAccelerator(KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
-        //loadFile.addActionListener(this);
-        loadFile.setActionCommand("O");
+        loadFile.addActionListener(this);
+        loadFile.setActionCommand("openFile");
 
         saveFile = new JMenuItem("Save File");
         saveFile.setAccelerator(KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
-        //saveFile.addActionListener(this);
-        saveFile.setActionCommand("S");
+        saveFile.addActionListener(this);
+        saveFile.setActionCommand("saveContent");
 
         setJMenuBar(mb);
         mb.add(fileMenu);
@@ -240,6 +240,17 @@ public class table_pane_test extends JFrame implements ActionListener {
                 newInvCmd();
                 break;
 
+            case "openFile":
+                openFile();
+                break;
+
+            case "saveContent":
+                try {
+                    saveContent();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                break;
         }
     }
 
@@ -351,10 +362,9 @@ public class table_pane_test extends JFrame implements ActionListener {
                     break;
                 }
             }
-        }
-        else // new customer
+        } else // new customer
         {
-            invoices_model.addRow(new String[]{ lbl_invoice_number_value.getText()  , tbx_invoice_date.getText() ,tbx_customer_name.getText(),"0"});
+            invoices_model.addRow(new String[]{lbl_invoice_number_value.getText(), tbx_invoice_date.getText(), tbx_customer_name.getText(), "0"});
             new_inv_flag = false;
 
         }
@@ -556,24 +566,80 @@ public class table_pane_test extends JFrame implements ActionListener {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         Date date = new Date();
 
-        for (int counter = 0; counter < invoices_model.getRowCount() ; counter++) {
-            if (Integer.valueOf((String) invoices_model.getValueAt(counter,0)) > maxInvId)
-            {
-                maxInvId = Integer.valueOf((String) invoices_model.getValueAt(counter,0));
+        for (int counter = 0; counter < invoices_model.getRowCount(); counter++) {
+            if (Integer.valueOf((String) invoices_model.getValueAt(counter, 0)) > maxInvId) {
+                maxInvId = Integer.valueOf((String) invoices_model.getValueAt(counter, 0));
             }
         }
         System.out.println(maxInvId);
-        lbl_invoice_number_value.setText(String.valueOf(maxInvId+1)   ) ;
-        lbl_invoice_total.setText("0") ;
+        lbl_invoice_number_value.setText(String.valueOf(maxInvId + 1));
+        lbl_invoice_total.setText("0");
         tbx_invoice_date.setText(String.valueOf(java.time.LocalDate.now()));
         tbx_customer_name.setText("");
         new_inv_flag = true;
 
 
+    }
+
+    private void openFile() {
+        JFileChooser fc = new JFileChooser();
+        int result = fc.showOpenDialog(this);
+        System.out.println(result);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            String path = fc.getSelectedFile().getPath();
+
+            try {
+
+                invoices_arr = invoicesTable.loadInvoices(path);
+
+                invoices_model = new DefaultTableModel(invoices_arr, tbl_invoices_table_cols);
+                tbl_invoices_table.setModel(invoices_model);
+            } catch (Exception e) {
+
+            }
+
+
+        }
+
+    }
+
+
+    private void saveContent() throws IOException {
+
+        JFileChooser fc = new JFileChooser();
+        int result = fc.showSaveDialog (this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            String path = fc.getSelectedFile().getPath();
+            try {
+                String itemsTableDataString = "";
+                for (int row_counter = 0; row_counter < tbl_invoices_table.getRowCount(); row_counter++) {
+                    for (int col_counter = 0; col_counter <= 3; col_counter++) {
+                        {
+                            if (col_counter != 3)
+                                itemsTableDataString = itemsTableDataString + tbl_invoices_table.getValueAt(row_counter, col_counter) + ",";
+                            else
+                                itemsTableDataString = itemsTableDataString + tbl_invoices_table.getValueAt(row_counter, col_counter);
+                        }
+                    }
+                    itemsTableDataString = itemsTableDataString + "\n";
+
+                }
+                System.out.println(itemsTableDataString);
+                Files.write(Paths.get(path + ".csv") , itemsTableDataString.getBytes());
+
+            } catch (java.io.FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+            }
+        }
 
 
     }
+
+
 }
+
 
 
 

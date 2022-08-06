@@ -21,7 +21,7 @@ public class invoicesTable {
 
 
 
-    public int getNoOfInvoices(String invoiceHeaderFile)
+    public static int getNoOfInvoices(String invoiceHeaderFile)
     {
         Path path = Paths.get(invoiceHeaderFile);
         long lines = 0;
@@ -34,11 +34,12 @@ public class invoicesTable {
     }
 
 
-    public String[][] loadInvoices(String fileName)
+    public static String[][] loadInvoices(String fileName)
     {
 
         itemsTable itemsTable = new itemsTable();
-        String[][] items_arr = itemsTable.loadItems("src\\InvoiceLine.csv");
+        //String[][] items_arr = itemsTable.loadItems("src\\InvoiceLine.csv");
+        //String[][] items_arr = itemsTable.loadItems(fileName);
 //        System.out.println(items_arr.length);
 
 
